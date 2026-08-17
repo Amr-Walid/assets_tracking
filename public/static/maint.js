@@ -344,12 +344,11 @@
     const log = document.getElementById('audit-scan-log')
     try {
       const r = await A.api('post', '/audits/' + auditId + '/scan', { asset_tag: tag })
-      const colors = { Found: 'green', WrongLocation: 'amber', Damaged: 'orange' }
       if (log) {
         log.insertAdjacentHTML(
           'afterbegin',
-          `<div class="text-xs bg-${colors[r.result] === 'green' ? 'green' : 'amber'}-50 border border-${colors[r.result] === 'green' ? 'green' : 'amber'}-200 rounded-lg px-2.5 py-1.5 flex items-center gap-2">
-            <i class="fas fa-circle-check text-${colors[r.result] === 'green' ? 'green' : 'amber'}-600"></i>
+          `<div class="text-xs ${r.result === 'Found' ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'} border rounded-lg px-2.5 py-1.5 flex items-center gap-2">
+            <i class="fas fa-circle-check ${r.result === 'Found' ? 'text-green-600' : 'text-amber-600'}"></i>
             <span class="font-mono font-bold">${A.esc(r.asset && r.asset.asset_tag)}</span>
             <span>${A.esc(r.asset && r.asset.name)}</span>
             <span class="mr-auto">${A.badge(A.tr('auditResult', r.result), A.L.auditResultColor[r.result])}</span>

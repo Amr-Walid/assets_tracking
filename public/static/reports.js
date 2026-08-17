@@ -5,6 +5,19 @@
   'use strict'
   const A = window.A
 
+  const ICON_BG = {
+    blue: 'bg-blue-100 text-blue-700',
+    green: 'bg-green-100 text-green-700',
+    amber: 'bg-amber-100 text-amber-700',
+    orange: 'bg-orange-100 text-orange-700',
+    red: 'bg-red-100 text-red-700',
+    purple: 'bg-purple-100 text-purple-700',
+    indigo: 'bg-indigo-100 text-indigo-700',
+    cyan: 'bg-cyan-100 text-cyan-700',
+    teal: 'bg-teal-100 text-teal-700',
+    slate: 'bg-slate-100 text-slate-700'
+  }
+
   const M = A.money
   const N = A.num
 
@@ -248,7 +261,7 @@
             const r = DEFS[k]
             return `<a href="#/reports/${k}" class="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md hover:border-brand-300 transition group">
               <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-${r.color === 'blue' ? 'blue' : r.color}-100 text-${r.color === 'blue' ? 'blue' : r.color}-700">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${ICON_BG[r.color] || ICON_BG.slate}">
                   <i class="fas ${r.icon}"></i>
                 </div>
                 <div class="min-w-0">

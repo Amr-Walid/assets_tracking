@@ -100,9 +100,6 @@
 
     // header with sorting for main columns
     const tableHtml = A.table(cols, d.items, { rowHref: (r) => '#/assets/' + r.id, empty: 'لا توجد أصول مطابقة' })
-    const withSort = tableHtml
-      .replace('>الرقم<', '>' + '' + '<')
-      .replace('>' + '' + '<', '>' + sortLink('asset_tag', 'الرقم') + '<')
 
     document.getElementById('assets-result').innerHTML = `
       <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
@@ -120,7 +117,7 @@
               .join('')}
           </div>
         </div>
-        ${withSort}
+        ${tableHtml}
         ${pager(d)}
       </div>`
   }
@@ -644,7 +641,7 @@
         ${A.pageHeader('نتيجة المسح', tag)}
         <div class="bg-white rounded-xl border border-red-200 p-8 text-center">
           <i class="fas fa-circle-xmark text-4xl text-red-400 mb-3 block"></i>
-          <h2 class="font-bold text-slate-700 mb-1">لم يتم العثون على الأصل</h2>
+          <h2 class="font-bold text-slate-700 mb-1">لم يتم العثور على الأصل</h2>
           <p class="text-sm text-slate-500 mb-4">${A.esc(e.message)}</p>
           ${A.btn({ label: 'مسح مرة أخرى', icon: 'fa-qrcode', onclick: "location.hash='#/scan'" })}
         </div>`)

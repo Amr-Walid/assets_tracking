@@ -741,7 +741,7 @@
 
   A.logout = async function () {
     try {
-      await A.api('post', '/logout')
+      await A.api('post', '/auth/logout')
     } catch (e) {}
     A.user = null
     A.clearCache()
@@ -812,7 +812,7 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'
       const d = A.formData(e.target)
       try {
-        const r = await A.api('post', '/login', { email: d.email, password: d.password })
+        const r = await A.api('post', '/auth/login', { email: d.email, password: d.password })
         A.user = r.user
         A.clearCache()
         A.toast('مرحباً ' + r.user.full_name, 'success')
@@ -1108,7 +1108,7 @@
       e.preventDefault()
       const d = A.formData(e.target)
       try {
-        await A.call('post', '/change-password', d)
+        await A.call('post', '/auth/change-password', d)
         A.toast('تم تحديث كلمة المرور', 'success')
         e.target.reset()
       } catch (ex) {}
@@ -1186,7 +1186,7 @@
 
   A.boot = async function () {
     try {
-      const d = await A.api('get', '/me')
+      const d = await A.api('get', '/auth/me')
       A.user = d.user
       A.unread = d.unread || 0
     } catch (e) {

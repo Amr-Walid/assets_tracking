@@ -43,6 +43,13 @@ export const shellHtml = /* html */ `<!DOCTYPE html>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <script src="/static/app.js?v=${APP_VERSION}"></script>
+  <script src="/static/core.js?v=${APP_VERSION}"></script>
+  <script src="/static/assets.js?v=${APP_VERSION}"></script>
+  <script src="/static/custody.js?v=${APP_VERSION}"></script>
+  <script src="/static/tickets.js?v=${APP_VERSION}"></script>
+  <script src="/static/maint.js?v=${APP_VERSION}"></script>
+  <script src="/static/reports.js?v=${APP_VERSION}"></script>
+  <script src="/static/admin.js?v=${APP_VERSION}"></script>
+  <script>A.boot()</script>
 </body>
 </html>`
