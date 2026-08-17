@@ -222,6 +222,11 @@ UPDATE assets SET
 
 UPDATE assets SET book_value = ROUND(purchase_cost - accumulated_depreciation, 2);
 
+-- أصول احتياطية بالمخزن (حالة InStore) — جاهزة للتسليم كعُهدة، واحد لكل شركة
+UPDATE assets SET status = 'InStore',
+  notes = 'مخزون احتياطي — جاهز للتسليم كعهدة'
+  WHERE id IN (22, 14, 38, 47);
+
 -- ============================================================
 -- سجل العُهد (18)
 -- ============================================================
@@ -425,7 +430,7 @@ CROSS JOIN (
   UNION ALL SELECT '2026-07-31', 1
   UNION ALL SELECT '2026-08-31', 0
 ) p
-WHERE a.status IN ('Active','UnderMaintenance')
+WHERE a.status NOT IN ('Disposed','Lost') AND a.purchase_date IS NOT NULL
   AND a.purchase_date IS NOT NULL
   AND a.purchase_date <= '2026-05-01';
 
