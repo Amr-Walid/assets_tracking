@@ -27,7 +27,7 @@
 
   A.money = function (n) {
     const v = Number(n || 0)
-    return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ر.س'
+    return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ج.م'
   }
 
   A.num = function (n) {
@@ -772,7 +772,7 @@
             <h1 class="text-xl font-extrabold text-slate-800 mb-1">تسجيل الدخول</h1>
             <p class="text-xs text-slate-500 mb-5">أدخل بياناتك للمتابعة</p>
             <form id="login-form" class="space-y-3">
-              ${A.inp({ name: 'email', label: 'البريد الإلكتروني', type: 'email', required: true, placeholder: 'admin@ats.sa' })}
+              ${A.inp({ name: 'email', label: 'البريد الإلكتروني', type: 'email', required: true, placeholder: 'admin@ats.eg' })}
               ${A.inp({ name: 'password', label: 'كلمة المرور', type: 'password', required: true, placeholder: '••••••' })}
               <div id="login-error" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
               <button type="submit" id="login-btn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-lg transition">
@@ -783,10 +783,10 @@
               <p class="text-[11px] font-bold text-slate-500 mb-2">حسابات تجريبية (كلمة المرور: 123456)</p>
               <div class="grid grid-cols-2 gap-1.5 text-[11px]">
                 ${[
-                  ['admin@ats.sa', 'مدير النظام'],
-                  ['manager1@ats.sa', 'مدير شركة'],
-                  ['tech1@ats.sa', 'فني صيانة'],
-                  ['emp1@ats.sa', 'موظف']
+                  ['admin@ats.eg', 'مدير النظام'],
+                  ['manager1@ats.eg', 'مدير شركة'],
+                  ['tech1@ats.eg', 'فني صيانة'],
+                  ['emp1@ats.eg', 'موظف']
                 ]
                   .map(
                     (x) =>

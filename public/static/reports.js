@@ -91,7 +91,7 @@
         { label: 'القطع', render: (r) => M(r.parts_total), csv: (r) => r.parts_total },
         { label: 'الإجمالي', render: (r) => `<b class="text-slate-800">${M(r.cost_total)}</b>`, csv: (r) => r.cost_total }
       ],
-      chart: (rows) => ({ type: 'bar', labels: rows.slice(0, 10).map((r) => r.asset_name), data: rows.slice(0, 10).map((r) => r.cost_total), title: 'التكلفة (ر.س)', horizontal: true })
+      chart: (rows) => ({ type: 'bar', labels: rows.slice(0, 10).map((r) => r.asset_name), data: rows.slice(0, 10).map((r) => r.cost_total), title: 'التكلفة (ج.م)', horizontal: true })
     },
     'technician-performance': {
       label: 'أداء الفنيين',

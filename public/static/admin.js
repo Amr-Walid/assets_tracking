@@ -39,10 +39,11 @@
   }
 
   const LOC_TYPES = [
-    { value: 'Building', label: 'مبنى' },
-    { value: 'Floor', label: 'طابق' },
-    { value: 'Room', label: 'غرفة' },
-    { value: 'Warehouse', label: 'مستودع' },
+    { value: 'Office', label: 'مكتب / مقر إداري' },
+    { value: 'Factory', label: 'مصنع' },
+    { value: 'Warehouse', label: 'مخزن / مستودع' },
+    { value: 'Building', label: 'مبنى / موقع مشروع' },
+    { value: 'Apartment', label: 'شقة / سكن' },
     { value: 'Branch', label: 'فرع' },
     { value: 'Other', label: 'أخرى' }
   ]
