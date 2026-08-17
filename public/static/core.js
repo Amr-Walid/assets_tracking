@@ -1175,11 +1175,19 @@
       await match.r.handler(params, A.query())
     } catch (e) {
       console.error('route error', path, e)
+      const nf = /غير موجود|not found/i.test(e.message || '')
       A.setContent(`<div class="py-16 text-center">
-        <i class="fas fa-circle-exclamation text-4xl text-red-400 mb-3 block"></i>
-        <h2 class="text-base font-bold text-slate-700 mb-1">تعذر تحميل الصفحة</h2>
-        <p class="text-xs text-slate-500 mb-3">${A.esc(e.message || '')}</p>
-        ${A.btn({ label: 'إعادة المحاولة', icon: 'fa-rotate', variant: 'secondary', onclick: 'A.dispatch()' })}
+        <i class="fas ${nf ? 'fa-folder-open text-slate-300' : 'fa-circle-exclamation text-red-400'} text-4xl mb-3 block"></i>
+        <h2 class="text-base font-bold text-slate-700 mb-1">${
+          nf ? 'السجل غير موجود أو لا تملك صلاحية الوصول إليه' : 'تعذر تحميل الصفحة'
+        }</h2>
+        <p class="text-xs text-slate-500 mb-3">${
+          nf ? 'قد يكون السجل تابعاً لشركة أو مستخدم آخر' : A.esc(e.message || '')
+        }</p>
+        <div class="flex gap-2 justify-center">
+          ${A.btn({ label: 'إعادة المحاولة', icon: 'fa-rotate', variant: 'secondary', onclick: 'A.dispatch()' })}
+          ${A.btn({ label: 'لوحة التحكم', icon: 'fa-gauge-high', onclick: "A.go('#/')" })}
+        </div>
       </div>`)
     }
   }

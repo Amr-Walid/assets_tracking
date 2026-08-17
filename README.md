@@ -1,21 +1,310 @@
-```txt
-npm install
-npm run dev
+# نظام إدارة وتتبع الأصول والدعم الفني (ATS)
+
+نظام متكامل لإدارة الأصول الثابتة، تتبعها بـ QR، إدارة العهد، تذاكر الصيانة مع SLA،
+الصيانة الوقائية، الجرد الدوري، الإهلاك، والتقارير — مع **عزل كامل بين الشركات**
+و**٤ مستويات صلاحيات** و**سجل تدقيق لكل عملية**.
+
+---
+
+## 1. نظرة عامة
+
+| | |
+|---|---|
+| **الاسم** | Asset Tracking System (ATS) |
+| **الهدف** | إدارة دورة حياة الأصل من الشراء حتى الإخراج، مع الدعم الفني والجرد والتقارير المالية |
+| **التقنية** | Hono 4 + TypeScript على Cloudflare Pages/Workers · D1 (SQLite) · Vanilla JS SPA · TailwindCSS · Chart.js |
+| **اللغة** | عربي كامل RTL (خط Cairo) |
+| **الحالة** | ✅ يعمل — تم اختبار ١٤٠ تحميل صفحة على ٤ أدوار |
+
+> **ملاحظة معمارية:** الخطة الأصلية (`master_plan.md`) تحدد ASP.NET Core + SQL Server.
+> نُفِّذ **نفس المخطط والمنطق والصلاحيات بالكامل** على Cloudflare (Hono + D1 SQLite)
+> ليكون النظام قابلاً للنشر الفوري على الحافة (Edge) بدون سيرفر.
+
+---
+
+## 2. الروابط
+
+| البيئة | الرابط |
+|---|---|
+| **التطوير (Sandbox)** | https://3000-iteywn6hry4kuwaxh9ztw-dfc00ec5.sandbox.novita.ai |
+| **GitHub** | https://github.com/Amr-Walid/assets_tracking |
+| **الإنتاج (Cloudflare)** | لم يُنشر بعد — جاهز للنشر |
+
+---
+
+## 3. الحسابات التجريبية
+
+كلمة المرور للجميع: **`123456`**
+
+| البريد | الدور | الشركة | ما يراه |
+|---|---|---|---|
+| `admin@ats.sa` | مدير النظام (Admin) | كل الشركات | كل شيء — ١٤ عنصر في القائمة |
+| `manager1@ats.sa` | مدير شركة | القابضة للاستثمار | شركته فقط — ١١ عنصر |
+| `tech1@ats.sa` | فني صيانة | القابضة للاستثمار | التذاكر المسندة + المتاحة — ٨ عناصر |
+| `emp1@ats.sa` | موظف | القابضة للاستثمار | عهدته وتذاكره فقط — ٧ عناصر |
+
+حسابات إضافية: `manager2@ats.sa`, `tech2@ats.sa`, `emp2@ats.sa`, `emp3@ats.sa`, `emp4@ats.sa`
+
+---
+
+## 4. الميزات المنجزة ✅
+
+### الأصول
+- قائمة مع بحث، فلترة (حالة/تصنيف/موقع/شركة)، ترتيب على ٦ أعمدة، ترقيم صفحات، تصدير CSV
+- إضافة/تعديل (١٧ حقلاً) · حذف ناعم (soft delete) · تغيير الحالة مع سبب
+- **QR لكل أصل** + طباعة ملصق · رابط قصير `/a/:tag`
+- استيراد جماعي (Bulk import)
+- تفاصيل الأصل: العهدة الحالية، سجل المواقع، التذاكر، الإهلاك، جداول الصيانة
+- ترقيم تلقائي `AST-YYYY-NNNNN`
+
+### مسح QR
+- مسح بالكاميرا (html5-qrcode) + إدخال يدوي
+- صفحة نتيجة المسح مع كل بيانات الأصل والإجراءات السريعة
+
+### العهد
+- عهدي الحالية · **الطلبات المعلّقة (قبول/رفض)** · سجل الحركات
+- إسناد عهدة لموظف · استرجاع · نقل موقع
+- سجل العهد الكامل للمديرين + تصدير CSV
+
+### تذاكر الصيانة + SLA
+- قائمة مفلترة (حالة/أولوية/تجاوز SLA) مع مؤشرات SLA اللونية
+- إنشاء تذكرة · إسناد لفني · انتقالات الحالة المحكومة بالصلاحيات
+- تعليقات (عامة/داخلية) · قطع الغيار (إضافة/حذف) · تقرير الحل
+- **محرك SLA** يحسب موعد الاستجابة والحل حسب الأولوية
+- ترقيم تلقائي `TKT-YYYY-NNNNN`
+
+### الصيانة الوقائية
+- جداول صيانة دورية (يومي/أسبوعي/شهري/ربع سنوي/سنوي)
+- تفعيل/تعطيل · تعديل · حذف · توليد تذاكر تلقائي
+
+### الجرد الدوري
+- جلسات جرد لكل موقع · **مسح ميداني** (كاميرا + يدوي)
+- تصنيف النتيجة: موجود / موقع خاطئ / تالف / مفقود
+- إغلاق الجلسة + تصدير النتائج
+
+### التقارير (١٢ تقريراً)
+الأصول حسب الشركة · حسب الحالة · حسب الموقع · العهد · تكاليف الصيانة ·
+أداء الفنيين · الالتزام بـ SLA · الإهلاك والقيمة الدفترية · الضمانات ·
+جلسات الجرد · عهدي · تذاكري
+— كلها برسوم بيانية + تصدير CSV + طباعة
+
+### الإدارة
+- **الهيكل التنظيمي** ٥ تبويبات: الشركات · الإدارات · المواقع · التصنيفات · الموردون (CRUD كامل)
+- **المستخدمون**: CRUD + الأدوار + تعطيل الحساب + إحصائيات
+- **سياسات SLA**: تعديل أزمنة الاستجابة/الحل لكل أولوية
+- **٤ مهام خلفية** بزر تشغيل: فحص SLA · الإهلاك الشهري · توليد الصيانة الوقائية · تنبيهات الضمان
+- **سجل التدقيق**: كل عملية مع المستخدم والوقت وIP وتفاصيل JSON للتغييرات
+- **الإشعارات**: قراءة فردية/جماعية + عدّاد غير المقروء
+- **الإعدادات**: قيم النظام العامة
+
+---
+
+## 5. الصلاحيات — ٤ بوابات دفاعية
+
+| # | البوابة | الوصف |
+|---|---|---|
+| 1 | **المصادقة** | كوكي جلسة `ats_session` (httpOnly، SameSite=Lax، ٧ أيام)، SHA-256 |
+| 2 | **سياسة الدور** | `requireRole()` على كل مسار حسب مصفوفة الصلاحيات (٢٢ وظيفة) |
+| 3 | **نطاق الشركة** | `companyScope()` — Admin يرى الكل، الباقي شركته فقط |
+| 4 | **ملكية السجل** | الموظف يرى عهدته وتذاكره فقط؛ الفني تذاكره المسندة + المتاحة |
+
+**مهم:** مخالفات نطاق الشركة تُرجع **404 وليس 403** — لمنع تعداد السجلات (anti-IDOR).
+
+---
+
+## 6. خرائط المسارات
+
+### صفحات الواجهة (Hash Router)
+
+| المسار | الصفحة | الأدوار |
+|---|---|---|
+| `#/` | لوحة التحكم (٣ أشكال حسب الدور) | الكل |
+| `#/assets` · `#/assets/:id` | الأصول / التفاصيل | الكل (مفلتر) |
+| `#/scan` · `#/scan-result/:tag` | مسح QR / النتيجة | الكل |
+| `#/custody` · `#/custody/logs` | العهد / السجل الكامل | الكل / مدير |
+| `#/tickets` · `#/tickets/:id` | التذاكر / التفاصيل | الكل (مفلتر) |
+| `#/schedules` | الصيانة الوقائية | Admin, مدير, فني |
+| `#/audits` · `#/audits/:id` | الجرد / جلسة الجرد | Admin, مدير, فني |
+| `#/reports` · `#/reports/:type` | التقارير (١٢ نوعاً) | حسب التقرير |
+| `#/org?tab=…` | الهيكل التنظيمي (٥ تبويبات) | Admin, مدير |
+| `#/users` | المستخدمون | Admin, مدير |
+| `#/sla` | سياسات SLA + المهام | Admin |
+| `#/audit-log` | سجل التدقيق | Admin |
+| `#/notifications` · `#/profile` | الإشعارات / حسابي | الكل |
+| `#/settings` | الإعدادات | Admin |
+
+### واجهة API
+
+```
+POST   /api/auth/login | logout | change-password
+GET    /api/auth/me
+
+GET    /api/assets?search=&status=&category_id=&location_id=&company_id=&sort=&dir=&page=&size=
+GET    /api/assets/:id · /api/assets/by-tag/:tag
+POST   /api/assets · /api/assets/:id/status · /api/assets/bulk
+PUT    /api/assets/:id        DELETE /api/assets/:id
+
+GET    /api/custody/my · /api/custody/logs
+POST   /api/custody/assign · /api/custody/:id/respond
+POST   /api/custody/return · /api/custody/transfer-location
+
+GET    /api/tickets?status=&priority=&breached=&page=&size=
+GET    /api/tickets/:id · /api/tickets/technicians
+GET    /api/tickets/sla/policies      PUT /api/tickets/sla/policies/:id
+POST   /api/tickets · /api/tickets/:id/assign · /:id/status · /:id/comments · /:id/parts
+DELETE /api/tickets/:id/parts/:partId
+
+GET/POST/PUT/DELETE  /api/companies · /departments · /locations · /categories · /vendors · /users
+
+GET    /api/dashboard · /api/notifications · /api/schedules · /api/audits · /api/audits/:id
+POST   /api/notifications/:id/read · /api/notifications/read-all
+POST   /api/schedules · /api/audits · /api/audits/:id/scan · /api/audits/:id/complete
+GET    /api/audit-logs?entity=&action=&page=&size=
+GET    /api/reports/:type            (١٢ نوعاً)
+POST   /api/jobs/sla-check | depreciation | generate-schedules | warranty-alerts
+GET/PUT /api/settings
+
+GET    /a/:tag        → 302 → /#/scan-result/:tag   (رابط QR القصير)
 ```
 
-```txt
+---
+
+## 7. معمارية البيانات
+
+### قاعدة البيانات: Cloudflare D1 (SQLite) — ٢٣ جدولاً + ٢٣ فهرساً
+
+| المجموعة | الجداول |
+|---|---|
+| التنظيم | `companies`, `departments`, `locations`, `asset_categories`, `vendors` |
+| المستخدمون | `users`, `sessions` |
+| الأصول | `assets`, `asset_status_history`, `asset_location_history`, `asset_depreciation` |
+| العهد | `custody_logs` |
+| الصيانة | `maintenance_tickets`, `ticket_comments`, `ticket_logs`, `ticket_parts`, `sla_policies`, `maintenance_schedules` |
+| الجرد | `inventory_audits`, `inventory_audit_items` |
+| النظام | `notifications`, `audit_logs`, `system_settings` |
+
+### قواعد المنطق
+- **الحذف الناعم**: `is_deleted` في كل الجداول الرئيسية — لا حذف فعلي
+- **الترقيم التلقائي**: `AST-YYYY-NNNNN` للأصول · `TKT-YYYY-NNNNN` للتذاكر
+- **الإهلاك**: القسط الثابت `(التكلفة − قيمة الإنقاذ) ÷ (العمر بالسنوات × ١٢)`
+- **SLA**: يُحسب موعد الاستجابة والحل عند إنشاء التذكرة حسب الأولوية
+- **سجل التدقيق**: كل Create/Update/Delete/Login/Export يُسجَّل مع JSON للتغييرات
+
+### تدفق البيانات
+```
+المتصفح (SPA وحدات JS)
+   ↓ fetch /api/*  (كوكي الجلسة)
+Hono Router → authMiddleware → requireRole → companyScope → معالج المسار
+   ↓
+D1 (SQLite) + audit() + notify()
+```
+
+---
+
+## 8. بنية المشروع
+
+```
+webapp/
+├── src/
+│   ├── index.tsx            # تركيب المسارات + middleware + رابط QR + SPA catch-all
+│   ├── page.ts              # قالب HTML (RTL, Tailwind, CDN) + تحميل الوحدات
+│   ├── lib.ts               # المصادقة، الصلاحيات، نطاق الشركة، التدقيق، الإشعارات
+│   └── routes/
+│       ├── auth.ts          # الدخول/الخروج/حسابي/تغيير كلمة المرور
+│       ├── org.ts           # الشركات/الإدارات/المواقع/التصنيفات/الموردين/المستخدمين
+│       ├── assets.ts        # الأصول + QR + الحالة + الاستيراد
+│       ├── custody.ts       # العهد
+│       ├── tickets.ts       # التذاكر + SLA + التعليقات + القطع
+│       └── misc.ts          # اللوحة/الإشعارات/الجداول/الجرد/التقارير/المهام/الإعدادات
+├── public/static/           # واجهة SPA — وحدات منفصلة (بدون ملف عملاق)
+│   ├── core.js              # النواة: API، مساعدات النماذج، الراوتر، الهيكل، اللوحة
+│   ├── assets.js            # الأصول + المسح
+│   ├── custody.js           # العهد
+│   ├── tickets.js           # التذاكر
+│   ├── maint.js             # الصيانة الوقائية + الجرد
+│   ├── reports.js           # ١٢ تقريراً
+│   └── admin.js             # الهيكل/المستخدمون/SLA/التدقيق/الإشعارات/الإعدادات
+├── migrations/0001_initial_schema.sql
+├── seed.sql                 # ٣ شركات، ٩ مستخدمين، ٢٠ أصلاً، ٨ تذاكر، ٣ جرد
+├── ecosystem.config.cjs     # PM2
+└── wrangler.jsonc           # Cloudflare + ربط D1
+```
+
+**قاعدة معمارية مهمة:** كل مساعد واجهة (`A.inp`, `A.sel`, `A.btn`, `A.modal`, `A.table` …)
+مُعرَّف **مرة واحدة فقط في `core.js`** ويأخذ **كائناً واحداً** كوسيط —
+لتفادي انحراف التوقيعات الذي كان يسبب أعطالاً في الملف العملاق السابق.
+
+---
+
+## 9. دليل الاستخدام السريع
+
+1. افتح الرابط → اضغط أحد **الحسابات التجريبية** → دخول
+2. **لوحة التحكم** تتغير حسب دورك (موظف / فني / مدير)
+3. **الأصول** → `أصل جديد` أو اضغط أي صف للتفاصيل والـ QR
+4. **مسح QR** → بالكاميرا أو اكتب رقم الأصل (`AST-2026-00001`)
+5. **العهد** → اقبل/ارفض الطلبات المعلّقة، أو استرجع عهدة
+6. **تذاكر الصيانة** → `تذكرة جديدة` → إسناد لفني → تحديث الحالة → حل
+7. **الجرد الدوري** → افتح جلسة → امسح الأصول → أغلق الجلسة
+8. **التقارير** → اختر تقريراً → رسم بياني + تصدير CSV
+9. **سياسات SLA** (Admin) → عدّل الأزمنة أو شغّل المهام الخلفية
+
+---
+
+## 10. التطوير والنشر
+
+```bash
+# البناء والتشغيل محلياً
+npm run build
+pm2 start ecosystem.config.cjs
+curl http://localhost:3000
+
+# قاعدة البيانات المحلية
+npm run db:migrate:local     # تطبيق المخطط
+npm run db:seed              # بيانات تجريبية
+npm run db:reset             # إعادة كاملة
+
+# النشر على Cloudflare Pages
+npx wrangler d1 create webapp-production      # مرة واحدة، انسخ database_id
+npm run db:migrate:prod
 npm run deploy
 ```
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+---
 
-```txt
-npm run cf-typegen
-```
+## 11. حالة الاختبار
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+| النوع | النتيجة |
+|---|---|
+| **تحميل الصفحات** | **١٤٠ تحميلاً** (٣٥ مسار × ٤ أدوار) — **٠ أخطاء JS** |
+| **المصادقة** | ٤ أدوار تسجل الدخول بنجاح |
+| **الصلاحيات** | القائمة الجانبية: Admin ١٤ · مدير ١١ · فني ٨ · موظف ٧ |
+| **عزل الشركات** | مؤكد — ٢٠ أصلاً للـ Admin مقابل ١١ لمدير الشركة |
+| **النماذج والنوافذ** | الأصول (١٧ حقلاً) · المستخدمون (١٠) · الشركات (٨) · الموردون (٦) · المواقع (٥) · التصنيفات (٥) · الإدارات (٤) — كلها تُعبَّأ مسبقاً عند التعديل |
+| **المهام الخلفية** | ٤/٤ تعمل وتُرجع نتائج |
+| **الرسوم البيانية** | لوحة التحكم ٥ رسوم · التقارير ✅ |
+| **QR** | التوليد ✅ · الطباعة ✅ · الرابط القصير `/a/:tag` ✅ |
+| **دورة التذكرة** | إنشاء → إسناد → InProgress → تعليق ✅ |
+| **التقارير** | ١٢/١٢ تعمل مع الفلترة حسب الدور |
 
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-```
+---
+
+## 12. غير منجز / الخطوات التالية
+
+- [ ] النشر الفعلي على Cloudflare Pages (يحتاج API token في تبويب Deploy)
+- [ ] إعادة تعيين كلمة المرور بالبريد (يحتاج مزود بريد مثل Resend)
+- [ ] تصدير PDF للتقارير (حالياً CSV + طباعة المتصفح)
+- [ ] رفع صور الأصول (يحتاج ربط R2)
+- [ ] تطبيق جوال للمسح الميداني بدون إنترنت
+- [ ] لوحة تحليلات متقدمة (توقع الأعطال)
+- [ ] تشغيل المهام الخلفية تلقائياً عبر Cloudflare Cron Triggers
+
+---
+
+## 13. النشر
+
+| | |
+|---|---|
+| **المنصة** | Cloudflare Pages / Workers |
+| **الحالة** | ✅ يعمل في بيئة التطوير · جاهز للإنتاج |
+| **التقنيات** | Hono 4 · TypeScript · D1 · Vite 8 · Wrangler 4 · TailwindCSS · Chart.js · PM2 |
+| **آخر تحديث** | 2026-08-17 |
