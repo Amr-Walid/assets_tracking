@@ -30,6 +30,19 @@
     return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ج.م'
   }
 
+  // Compact currency for narrow stat cards — Egyptian amounts reach millions and
+  // would otherwise be clipped by `truncate` inside the card.
+  A.moneyShort = function (n) {
+    const v = Number(n || 0)
+    const a = Math.abs(v)
+    const sign = v < 0 ? '-' : ''
+    const f = (x, s) => sign + x.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' ' + s
+    if (a >= 1e9) return f(a / 1e9, 'مليار')
+    if (a >= 1e6) return f(a / 1e6, 'مليون')
+    if (a >= 1e5) return f(a / 1e3, 'ألف')
+    return A.money(v)
+  }
+
   A.num = function (n) {
     return Number(n || 0).toLocaleString('en-US')
   }
@@ -168,16 +181,18 @@
     return `<${tag} ${href} class="block bg-white rounded-xl shadow-sm border border-slate-200 p-4 ${
       o.href ? 'hover:shadow-md hover:border-brand-300 transition' : ''
     }">
-      <div class="flex items-center justify-between">
-        <div class="min-w-0">
-          <p class="text-xs text-slate-500 mb-1">${A.esc(o.label)}</p>
-          <p class="text-xl font-extrabold text-slate-800 truncate">${o.value}</p>
-          ${o.sub ? `<p class="text-[11px] text-slate-400 mt-0.5">${A.esc(o.sub)}</p>` : ''}
+      <div class="flex items-center justify-between gap-2">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs text-slate-500 mb-1 truncate">${A.esc(o.label)}</p>
+          <p class="${o.compact ? 'text-lg' : 'text-xl'} font-extrabold text-slate-800 truncate${
+            o.tight ? ' tracking-tight' : ''
+          }"${o.title ? ` title="${A.esc(o.title)}"` : ''}>${o.value}</p>
+          ${o.sub ? `<p class="text-[11px] text-slate-400 mt-0.5 truncate"${o.subTitle ? ` title="${A.esc(o.subTitle)}"` : ''}>${A.esc(o.sub)}</p>` : ''}
         </div>
-        <div class="w-11 h-11 shrink-0 rounded-lg flex items-center justify-center ${
+        <div class="${o.compact ? 'w-9 h-9' : 'w-11 h-11'} shrink-0 rounded-lg flex items-center justify-center ${
           COLORS[o.color] || COLORS.blue
         }">
-          <i class="fas ${o.icon} text-lg"></i>
+          <i class="fas ${o.icon} ${o.compact ? 'text-base' : 'text-lg'}"></i>
         </div>
       </div>
     </${tag}>`
@@ -951,7 +966,17 @@
       ${A.pageHeader('لوحة التحكم', A.user.role === 'Admin' ? 'نظرة عامة على كل الشركات' : 'نظرة عامة — ' + (A.user.company_name || ''))}
       <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3 mb-5">
         ${A.statCard({ label: 'إجمالي الأصول', value: A.num(c.total_assets), icon: 'fa-boxes-stacked', color: 'blue', href: '#/assets' })}
-        ${A.statCard({ label: 'القيمة الدفترية', value: A.money(c.book_value), icon: 'fa-sack-dollar', color: 'green', sub: 'الشراء: ' + A.money(c.purchase_value) })}
+        ${A.statCard({
+          label: 'القيمة الدفترية',
+          value: A.moneyShort(c.book_value) + ' <span class="text-xs font-bold text-slate-500">ج.م</span>',
+          title: A.money(c.book_value),
+          tight: true,
+          icon: 'fa-sack-dollar',
+          color: 'green',
+          compact: true,
+          sub: 'الشراء: ' + A.moneyShort(c.purchase_value) + ' ج.م',
+          subTitle: 'الشراء: ' + A.money(c.purchase_value)
+        })}
         ${A.statCard({ label: 'تذاكر مفتوحة', value: A.num(c.open_tickets), icon: 'fa-screwdriver-wrench', color: 'amber', href: '#/tickets' })}
         ${A.statCard({ label: 'مخالفات SLA', value: A.num(c.sla_breached), icon: 'fa-triangle-exclamation', color: 'red', href: '#/tickets?breached=1' })}
         ${A.statCard({ label: 'عهد بانتظار القبول', value: A.num(c.pending_custody), icon: 'fa-hourglass-half', color: 'orange', href: '#/custody' })}
