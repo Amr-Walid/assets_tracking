@@ -1,0 +1,12 @@
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/bin/Debug/net8.0/AssetTracking.Domain.deps.json
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/bin/Debug/net8.0/AssetTracking.Domain.dll
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/bin/Debug/net8.0/AssetTracking.Domain.pdb
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.AssemblyInfoInputs.cache
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.AssemblyInfo.cs
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.csproj.CoreCompileInputs.cache
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.sourcelink.json
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.dll
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/refint/AssetTracking.Domain.dll
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/AssetTracking.Domain.pdb
+/home/user/webapp/AssetTracking/src/AssetTracking.Domain/obj/Debug/net8.0/ref/AssetTracking.Domain.dll
