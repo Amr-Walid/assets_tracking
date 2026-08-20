@@ -175,6 +175,16 @@ public class AuditService : IAuditService
 
     public AuditService(AppDbContext db, ICurrentUser me) { _db = db; _me = me; }
 
+    /// <summary>
+    /// إعدادات التسلسل: UnsafeRelaxedJsonEscaping تمنع تحويل الحروف العربية
+    /// إلى صيغ \uXXXX غير مقروءة داخل سجل التدقيق.
+    /// </summary>
+    private static readonly JsonSerializerOptions AuditJson = new()
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = false
+    };
+
     public async Task LogAsync(string action, string entityName, string? entityId,
         object? oldValues = null, object? newValues = null, CancellationToken ct = default)
     {
@@ -186,8 +196,8 @@ public class AuditService : IAuditService
             Action = action,
             EntityName = entityName,
             EntityId = entityId,
-            OldValues = oldValues == null ? null : JsonSerializer.Serialize(oldValues),
-            NewValues = newValues == null ? null : JsonSerializer.Serialize(newValues),
+            OldValues = oldValues == null ? null : JsonSerializer.Serialize(oldValues, AuditJson),
+            NewValues = newValues == null ? null : JsonSerializer.Serialize(newValues, AuditJson),
             IpAddress = _me.IpAddress,
             UserAgent = _me.UserAgent
         });

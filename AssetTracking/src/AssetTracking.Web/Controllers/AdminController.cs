@@ -1107,14 +1107,21 @@ public class AdminController : BaseController
     };
 
     // ═════════════════════ سجل التدقيق ═════════════════════
-    public async Task<IActionResult> AuditLog(string? q, string? action, string? entityName,
-        DateTime? from, DateTime? to, int page = 1)
+    // ملاحظة: لا نسمي المعامل "action" لأنه يتعارض مع قيمة المسار (Route Value) الخاصة بالأكشن
+    // فيُربَط تلقائياً بالقيمة "AuditLog" ويُفرغ النتائج. نستخدم "act" بدلاً منه.
+    public async Task<IActionResult> AuditLog(
+        [FromQuery] string? q,
+        [FromQuery(Name = "act")] string? act,
+        [FromQuery] string? entityName,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] int page = 1)
     {
         if (page < 1) page = 1;
 
         var vm = new AuditLogViewModel
         {
-            Q = Clean(q), Action = Clean(action), EntityName = Clean(entityName),
+            Q = Clean(q), Action = Clean(act), EntityName = Clean(entityName),
             From = from, To = to, Page = page
         };
 
@@ -1153,9 +1160,12 @@ public class AdminController : BaseController
             }).ToListAsync();
 
         vm.Actions = await _db.AuditLogs.AsNoTracking()
-            .Select(a => a.Action).Distinct().OrderBy(x => x).Take(60).ToListAsync();
+            .Select(a => a.Action).Distinct().ToListAsync();
+        vm.Actions = vm.Actions.OrderBy(x => x, StringComparer.Ordinal).Take(60).ToList();
+
         vm.Entities = await _db.AuditLogs.AsNoTracking()
-            .Select(a => a.EntityName).Distinct().OrderBy(x => x).Take(60).ToListAsync();
+            .Select(a => a.EntityName).Distinct().ToListAsync();
+        vm.Entities = vm.Entities.OrderBy(x => x, StringComparer.Ordinal).Take(60).ToList();
 
         ViewData["Page"] = vm.Page;
         ViewData["TotalPages"] = vm.TotalPages;

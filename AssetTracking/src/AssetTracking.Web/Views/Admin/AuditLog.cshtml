@@ -23,8 +23,89 @@
         "Return" => "استرجاع عهدة",
         "Transfer" => "نقل",
         "Dispose" => "تخريد",
+        "ChangeStatus" => "تغيير الحالة",
+        "Close" => "إغلاق تذكرة",
+        "Resolve" => "حل تذكرة",
+        "CustodyAccept" => "قبول عهدة",
+        "CustodyReject" => "رفض عهدة",
+        "StartAudit" => "بدء جرد",
+        "CompleteAudit" => "إتمام جرد",
+        "CancelAudit" => "إلغاء جرد",
+        "ToggleSchedule" => "تفعيل/تعطيل خطة صيانة",
+        "GenerateTicket" => "توليد تذكرة صيانة",
+        "CreateCategory" => "إنشاء تصنيف",
+        "EditCategory" => "تعديل تصنيف",
+        "CreateSla" => "إنشاء سياسة SLA",
+        "EditSla" => "تعديل سياسة SLA",
+        "CreateCompany" => "إنشاء شركة",
+        "EditCompany" => "تعديل شركة",
+        "CreateDepartment" => "إنشاء إدارة",
+        "EditDepartment" => "تعديل إدارة",
+        "CreateLocation" => "إنشاء موقع",
+        "EditLocation" => "تعديل موقع",
+        "CreateVendor" => "إنشاء مورّد",
+        "EditVendor" => "تعديل مورّد",
         _ => a
     };
+
+    // أسماء الكيانات بالعربية
+    string EntityAr(string e) => e switch
+    {
+        "ApplicationUser" => "مستخدم",
+        "Asset" => "أصل",
+        "MaintenanceTicket" => "تذكرة صيانة",
+        "MaintenanceSchedule" => "خطة صيانة",
+        "InventoryAudit" => "جرد",
+        "CustodyLog" => "سجل عهدة",
+        "Category" or "categories" => "تصنيف",
+        "SlaPolicy" or "sla" => "سياسة SLA",
+        "Company" or "companies" => "شركة",
+        "Department" or "departments" => "إدارة",
+        "Location" or "locations" => "موقع",
+        "Vendor" or "vendors" => "مورّد",
+        _ => e
+    };
+
+    // أسماء الحقول بالعربية داخل عمود التغيير
+    string FieldAr(string k) => k switch
+    {
+        "Status" => "الحالة", "Resolution" => "الحل", "TotalCost" => "التكلفة الإجمالية",
+        "Code" => "الكود", "Title" => "العنوان", "TotalExpected" => "المتوقع",
+        "TotalScanned" => "الممسوح", "TotalMissing" => "المفقود", "ScheduledDate" => "التاريخ المجدول",
+        "TechnicianId" => "الفني", "TicketNumber" => "رقم التذكرة", "NextDueDate" => "الاستحقاق التالي",
+        "active" => "مُفعَّل", "accept" => "قبول", "note" => "ملاحظة", "Priority" => "الأولوية",
+        "NameAr" => "الاسم", "IsActive" => "مُفعَّل",
+        _ => k
+    };
+
+    // تحويل حِمل JSON إلى نص عربي مقروء "الحقل: القيمة · الحقل: القيمة"
+    string Pretty(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "";
+        raw = raw.Trim();
+        if (!raw.StartsWith("{")) return raw;
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(raw);
+            if (doc.RootElement.ValueKind != System.Text.Json.JsonValueKind.Object) return raw;
+            var parts = new List<string>();
+            foreach (var p in doc.RootElement.EnumerateObject())
+            {
+                var v = p.Value.ValueKind switch
+                {
+                    System.Text.Json.JsonValueKind.String => p.Value.GetString() ?? "",
+                    System.Text.Json.JsonValueKind.True => "نعم",
+                    System.Text.Json.JsonValueKind.False => "لا",
+                    System.Text.Json.JsonValueKind.Null => "—",
+                    _ => p.Value.ToString()
+                };
+                if (v.Length > 90) v = v.Substring(0, 90) + "…";
+                parts.Add($"{FieldAr(p.Name)}: {v}");
+            }
+            return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+        }
+        catch { return raw; }
+    }
 
     string ActionCls(string a) => a switch
     {
@@ -69,7 +150,7 @@
         </div>
         <div class="col-6 col-md-2">
             <label class="form-label">نوع العملية</label>
-            <select name="action" class="form-select" data-autosubmit>
+            <select name="act" class="form-select" data-autosubmit>
                 <option value="">الكل</option>
                 @foreach (var a in Model.Actions)
                 {
@@ -83,7 +164,7 @@
                 <option value="">الكل</option>
                 @foreach (var e in Model.Entities)
                 {
-                    <option value="@e" selected="@(Model.EntityName == e)">@e</option>
+                    <option value="@e" selected="@(Model.EntityName == e)">@EntityAr(e)</option>
                 }
             </select>
         </div>
@@ -153,28 +234,33 @@
                             <span class="badge @ActionCls(a.Action)">@ActionAr(a.Action)</span>
                         </td>
                         <td>
-                            <div>@a.EntityName</div>
+                            <div>@EntityAr(a.EntityName)</div>
                             @if (!string.IsNullOrEmpty(a.EntityId))
                             {
-                                <small class="text-muted mono">#@a.EntityId</small>
+                                var shortId = a.EntityId.Length > 12 ? a.EntityId.Substring(0, 8) + "…" : a.EntityId;
+                                <small class="text-muted mono" title="@a.EntityId">#@shortId</small>
                             }
                         </td>
                         <td style="max-width:380px">
-                            @if (!string.IsNullOrEmpty(a.OldValues) && !string.IsNullOrEmpty(a.NewValues))
+                            @{
+                                var oldTxt = Pretty(a.OldValues);
+                                var newTxt = Pretty(a.NewValues);
+                            }
+                            @if (!string.IsNullOrEmpty(oldTxt) && !string.IsNullOrEmpty(newTxt))
                             {
                                 <div class="small">
-                                    <span class="text-danger text-decoration-line-through">@a.OldValues</span>
+                                    <span class="text-danger text-decoration-line-through">@oldTxt</span>
                                     <i class="bi bi-arrow-left-short"></i>
-                                    <span class="text-success fw-semibold">@a.NewValues</span>
+                                    <span class="text-success fw-semibold">@newTxt</span>
                                 </div>
                             }
-                            else if (!string.IsNullOrEmpty(a.NewValues))
+                            else if (!string.IsNullOrEmpty(newTxt))
                             {
-                                <small class="text-success">@a.NewValues</small>
+                                <small class="text-success">@newTxt</small>
                             }
-                            else if (!string.IsNullOrEmpty(a.OldValues))
+                            else if (!string.IsNullOrEmpty(oldTxt))
                             {
-                                <small class="text-danger">@a.OldValues</small>
+                                <small class="text-danger">@oldTxt</small>
                             }
                             else
                             {
