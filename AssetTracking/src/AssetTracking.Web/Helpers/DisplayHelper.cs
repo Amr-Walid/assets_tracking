@@ -262,6 +262,21 @@ public static class DisplayHelper
         _ => t.ToString()
     };
 
+    // ── الشارات الجاهزة (HTML) ───────────────────────────────
+    // ملاحظة مهمة: Badge() تُرجع "اسم الكلاس" فقط (مثل bg-success)،
+    // أما Chip() فتُرجع الشارة كاملة <span class="badge ...">الاسم</span>.
+    // استخدم Chip داخل @Html.Raw(...) حتى لا يظهر اسم الكلاس كنص للمستخدم.
+    private static string Wrap(string cssClass, string text)
+        => $"<span class=\"badge {cssClass}\">{System.Net.WebUtility.HtmlEncode(text)}</span>";
+
+    public static string Chip(AssetStatus s) => Wrap(Badge(s), Name(s));
+    public static string Chip(TicketStatus s) => Wrap(Badge(s), Name(s));
+    public static string Chip(TicketPriority p) => Wrap(Badge(p), Name(p));
+    public static string Chip(CustodyStatus s) => Wrap(Badge(s), Name(s));
+    public static string Chip(AuditStatus s) => Wrap(Badge(s), Name(s));
+    public static string Chip(AuditItemResult r) => Wrap(Badge(r), Name(r));
+    public static string Chip(ScheduleStatus s) => Wrap(Badge(s), Name(s));
+
     /// <summary>ألوان مخصصة للرسوم البيانية — ثابتة لكل حالة</summary>
     public static string ChartColor(int index)
     {

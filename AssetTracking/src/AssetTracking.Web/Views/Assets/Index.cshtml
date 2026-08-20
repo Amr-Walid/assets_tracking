@@ -124,7 +124,7 @@
                             </td>
                             <td><small>@a.CategoryName</small></td>
                             <td><small>@(a.LocationName ?? "—")</small></td>
-                            <td>@Html.Raw(DisplayHelper.Badge(a.Status))</td>
+                            <td>@Html.Raw(DisplayHelper.Chip(a.Status))</td>
                             <td>
                                 @if (!string.IsNullOrEmpty(a.CustodyUserName))
                                 {

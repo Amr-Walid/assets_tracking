@@ -14,7 +14,7 @@
         </nav>
         <h1><i class="bi bi-box-seam"></i> @Model.NameAr</h1>
         <p class="mb-0">
-            @Html.Raw(DisplayHelper.Badge(Model.Status))
+            @Html.Raw(DisplayHelper.Chip(Model.Status))
             <span class="text-muted">· @Model.CategoryName</span>
             @if (!string.IsNullOrEmpty(Model.CompanyName))
             {
@@ -172,8 +172,8 @@
                                     </td>
                                     <td>@t.Title</td>
                                     <td><small>@DisplayHelper.Name(t.Type)</small></td>
-                                    <td>@Html.Raw(DisplayHelper.Badge(t.Priority))</td>
-                                    <td>@Html.Raw(DisplayHelper.Badge(t.Status))</td>
+                                    <td>@Html.Raw(DisplayHelper.Chip(t.Priority))</td>
+                                    <td>@Html.Raw(DisplayHelper.Chip(t.Status))</td>
                                     <td><small>@DisplayHelper.Date(t.ReportedAt)</small></td>
                                 </tr>
                             }
@@ -202,7 +202,7 @@
                             {
                                 <tr>
                                     <td>@DisplayHelper.Name(c.Action)</td>
-                                    <td>@Html.Raw(DisplayHelper.Badge(c.Status))</td>
+                                    <td>@Html.Raw(DisplayHelper.Chip(c.Status))</td>
                                     <td><small>@(c.NewUserName ?? "—")</small></td>
                                     <td><small>@(c.AssignedByName ?? "—")</small></td>
                                     <td><small>@DisplayHelper.Date(c.ActionDate)</small></td>
@@ -322,7 +322,7 @@
                                     <small class="text-muted">@DisplayHelper.Name(s.Frequency)</small>
                                 </div>
                                 <div class="text-end">
-                                    @Html.Raw(DisplayHelper.Badge(s.Status))
+                                    @Html.Raw(DisplayHelper.Chip(s.Status))
                                     <div>
                                         <small class="@(s.IsOverdue ? "text-danger fw-semibold" : "text-muted")">
                                             @DisplayHelper.Date(s.NextDueDate)
