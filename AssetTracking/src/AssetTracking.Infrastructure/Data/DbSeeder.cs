@@ -254,6 +254,7 @@ public static class DbSeeder
 
         var created = new List<ApplicationUser>();
         var n = 1;
+        _userRoles.Clear();
 
         foreach (var (email, name, role, ci, di, job) in defs)
         {
@@ -276,12 +277,22 @@ public static class DbSeeder
             {
                 await um.AddToRoleAsync(u, role);
                 created.Add(u);
+                _userRoles[u.Id] = role;
             }
             n++;
         }
 
         return created;
     }
+
+    // خريطة (معرّف المستخدم ← الدور) تُستخدم داخل المُهيّئ فقط، حتى نُسند
+    // التذاكر والعهد لأصحاب الأدوار الصحيحة دون استعلام Identity في كل دورة.
+    private static readonly Dictionary<string, string> _userRoles = new();
+
+    private static List<ApplicationUser> InRole(List<ApplicationUser> users, string role, int? companyId = null)
+        => users.Where(u => _userRoles.TryGetValue(u.Id, out var r) && r == role
+                            && (companyId == null || u.CompanyId == companyId))
+                .ToList();
 
     private static async Task<List<Asset>> SeedAssetsAsync(AppDbContext db, List<Company> comps,
         List<Category> cats, List<Department> depts, List<Location> locs,
@@ -400,7 +411,11 @@ public static class DbSeeder
         var logs = new List<CustodyLog>();
         var rnd = new Random(7);
 
-        var employees = users.Where(u => u.CompanyId != null).ToList();
+        // العهد تُسلَّم للموظفين والفنيين (لا للمديرين ولا لمدير النظام)
+        var employees = users.Where(u => u.CompanyId != null
+                                         && _userRoles.TryGetValue(u.Id, out var r)
+                                         && (r == Roles.Employee || r == Roles.Technician))
+                             .ToList();
 
         foreach (var comp in assets.GroupBy(a => a.CompanyId))
         {
@@ -428,7 +443,8 @@ public static class DbSeeder
                     Action = CustodyAction.Assign,
                     Status = status,
                     NewUserId = emp.Id,
-                    AssignedByUserId = users.First(u => u.CompanyId == comp.Key || u.CompanyId == null).Id,
+                    AssignedByUserId = (InRole(users, Roles.CompanyManager, comp.Key).FirstOrDefault()
+                                        ?? users.First(u => u.CompanyId == null)).Id,
                     ActionDate = when,
                     RespondedAt = status == CustodyStatus.Pending ? null : when.AddHours(rnd.Next(1, 48)),
                     Reason = "تسليم عهدة للاستخدام الوظيفي",
@@ -486,9 +502,16 @@ public static class DbSeeder
             var asset = eligible[(i * 3) % eligible.Count];
             var (title, desc, prio) = titles[i % titles.Length];
 
-            var techs = users.Where(u => u.CompanyId == asset.CompanyId).ToList();
+            // الفنيون فقط هم من تُسند إليهم التذاكر، والمُبلِّغون موظفون —
+            // هكذا تبدو البيانات التجريبية منطقية وتظهر لوحة الفني ممتلئة.
+            var techs = InRole(users, Roles.Technician, asset.CompanyId);
+            if (techs.Count == 0) techs = InRole(users, Roles.Technician);
+
+            var requesters = InRole(users, Roles.Employee, asset.CompanyId);
+            if (requesters.Count == 0) requesters = InRole(users, Roles.Employee);
+
             var tech = techs.Count > 0 ? techs[i % techs.Count] : users[0];
-            var requester = techs.Count > 1 ? techs[(i + 1) % techs.Count] : users[0];
+            var requester = requesters.Count > 0 ? requesters[i % requesters.Count] : users[0];
 
             var reported = DateTime.UtcNow.AddDays(-rnd.Next(1, 90)).AddHours(-rnd.Next(0, 20));
             var st = statuses[i];
@@ -644,7 +667,9 @@ public static class DbSeeder
 
         foreach (var a in machines)
         {
-            var tech = users.FirstOrDefault(u => u.CompanyId == a.CompanyId);
+            // الصيانة الوقائية مسؤولية فني من نفس الشركة
+            var tech = InRole(users, Roles.Technician, a.CompanyId).FirstOrDefault()
+                       ?? InRole(users, Roles.Technician).FirstOrDefault();
             var start = DateTime.UtcNow.AddMonths(-rnd.Next(2, 12)).Date;
             var freq = (ScheduleFrequency)rnd.Next(2, 7);
 
@@ -735,7 +760,9 @@ public static class DbSeeder
         foreach (var g in assets.GroupBy(a => a.CompanyId).Take(4))
         {
             var loc = locs.FirstOrDefault(l => l.CompanyId == g.Key);
-            var resp = users.FirstOrDefault(u => u.CompanyId == g.Key);
+            // الجرد يقوده مدير الشركة
+            var resp = InRole(users, Roles.CompanyManager, g.Key).FirstOrDefault()
+                       ?? users.FirstOrDefault(u => u.CompanyId == g.Key);
 
             var status = n switch
             {

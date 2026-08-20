@@ -158,6 +158,7 @@
             },
             options: {
                 responsive: true,
+                animation: { duration: 420 },
                 maintainAspectRatio: false,
                 cutout: '58%',
                 plugins: {
@@ -193,6 +194,7 @@
             options: {
                 indexAxis: horizontal ? 'y' : 'x',
                 responsive: true,
+                animation: { duration: 420 },
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
@@ -230,6 +232,7 @@
             },
             options: {
                 responsive: true,
+                animation: { duration: 420 },
                 maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
