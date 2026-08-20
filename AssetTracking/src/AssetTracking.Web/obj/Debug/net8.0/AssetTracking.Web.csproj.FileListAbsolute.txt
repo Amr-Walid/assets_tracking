@@ -212,3 +212,5 @@
 /home/user/webapp/AssetTracking/src/AssetTracking.Web/obj/Debug/net8.0/AssetTracking.Web.pdb
 /home/user/webapp/AssetTracking/src/AssetTracking.Web/obj/Debug/net8.0/AssetTracking.Web.genruntimeconfig.cache
 /home/user/webapp/AssetTracking/src/AssetTracking.Web/obj/Debug/net8.0/ref/AssetTracking.Web.dll
+/home/user/webapp/AssetTracking/src/AssetTracking.Web/obj/Debug/net8.0/AssetTracking.Web.RazorAssemblyInfo.cache
+/home/user/webapp/AssetTracking/src/AssetTracking.Web/obj/Debug/net8.0/AssetTracking.Web.RazorAssemblyInfo.cs
