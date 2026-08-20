@@ -115,13 +115,15 @@ public class HomeController : BaseController
         vm.DisposedAssets = await _db.Assets.CountAsync(a => a.Status == AssetStatus.Disposed);
         vm.LostAssets = await _db.Assets.CountAsync(a => a.Status == AssetStatus.Lost);
 
-        vm.TotalPurchaseValue = await _db.Assets
+        // ملاحظة: SQLite لا يدعم SUM على decimal، لذا نجمع على العميل.
+        // استعلام واحد يجلب القيمتين معاً — لا فرق ملموس في الأداء.
+        var assetValues = await _db.Assets
             .Where(a => a.Status != AssetStatus.Disposed)
-            .SumAsync(a => a.PurchaseValue ?? 0m);
+            .Select(a => new { a.PurchaseValue, a.BookValue })
+            .ToListAsync();
 
-        vm.TotalBookValue = await _db.Assets
-            .Where(a => a.Status != AssetStatus.Disposed)
-            .SumAsync(a => a.BookValue ?? 0m);
+        vm.TotalPurchaseValue = assetValues.Sum(x => x.PurchaseValue ?? 0m);
+        vm.TotalBookValue = assetValues.Sum(x => x.BookValue ?? 0m);
 
         vm.OpenTickets = await _db.MaintenanceTickets
             .CountAsync(t => t.Status == TicketStatus.Open || t.Status == TicketStatus.Assigned);
@@ -151,11 +153,16 @@ public class HomeController : BaseController
             .CountAsync(s => s.Status == ScheduleStatus.Active
                              && s.NextDueDate <= DateTime.UtcNow.AddDays(7));
 
-        vm.AssetsByCategory = await _db.Assets
+        // نُرتّب ونقتطع على العميل — SQLite لا يدعم ORDER BY على decimal
+        var byCategory = await _db.Assets
             .GroupBy(a => a.Category!.NameAr)
-            .Select(g => new ChartPoint { Label = g.Key, Value = g.Count() })
-            .OrderByDescending(x => x.Value).Take(8)
+            .Select(g => new { Label = g.Key, Count = g.Count() })
             .ToListAsync();
+
+        vm.AssetsByCategory = byCategory
+            .OrderByDescending(x => x.Count).Take(8)
+            .Select(x => new ChartPoint { Label = x.Label, Value = x.Count })
+            .ToList();
 
         vm.AssetsByStatus = new List<ChartPoint>
         {

@@ -110,7 +110,18 @@ builder.Services.AddHangfire(cfg =>
     if (useHangfireSql) cfg.UseSqlServerStorage(connectionString);
     else cfg.UseMemoryStorage();
 });
-builder.Services.AddHangfireServer();
+
+// خادم المهام الخلفية — يمكن تعطيله في البيئات محدودة الذاكرة
+// (كل عامل Worker يستهلك خيطاً؛ الافتراضي = مُفعَّل)
+var enableJobs = builder.Configuration.GetValue("EnableBackgroundJobs", true);
+if (enableJobs)
+{
+    builder.Services.AddHangfireServer(o =>
+    {
+        // في التطوير نقلّل عدد العاملين لتوفير الذاكرة
+        o.WorkerCount = useHangfireSql ? Math.Min(20, Environment.ProcessorCount * 5) : 2;
+    });
+}
 
 builder.Services.AddSignalR();
 builder.Services.AddControllersWithViews();
@@ -152,21 +163,32 @@ app.MapHangfireDashboard("/jobs", new DashboardOptions
 app.MapGet("/a/{tag}", (string tag) => Results.Redirect($"/Assets/ByTag/{tag}"));
 
 // ── تهيئة قاعدة البيانات والبيانات التجريبية ──────────────
-await DbSeeder.SeedAsync(app.Services);
+// فشل التهيئة لا يجب أن يمنع إقلاع التطبيق — يُسجَّل ويُكمَل
+try
+{
+    await DbSeeder.SeedAsync(app.Services);
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "فشلت تهيئة قاعدة البيانات — التطبيق سيقلع بدون بيانات تجريبية");
+}
 
 // ── جدولة المهام الخلفية ──────────────────────────────────
-RecurringJob.AddOrUpdate<MaintenanceJobs>("sla-escalation",
-    j => j.SlaEscalationJob(), "*/15 * * * *");
-RecurringJob.AddOrUpdate<MaintenanceJobs>("depreciation-monthly",
-    j => j.DepreciationJob(), Cron.Monthly(1, 2));
-RecurringJob.AddOrUpdate<MaintenanceJobs>("preventive-maintenance",
-    j => j.PreventiveMaintenanceJob(), Cron.Daily(6));
-RecurringJob.AddOrUpdate<MaintenanceJobs>("warranty-expiry",
-    j => j.WarrantyExpiryAlertJob(), Cron.Daily(7));
-RecurringJob.AddOrUpdate<MaintenanceJobs>("ticket-reminder",
-    j => j.TicketReminderJob(), Cron.Daily(8));
-RecurringJob.AddOrUpdate<MaintenanceJobs>("data-cleanup",
-    j => j.DataCleanupJob(), Cron.Weekly(DayOfWeek.Sunday, 3));
+if (enableJobs)
+{
+    RecurringJob.AddOrUpdate<MaintenanceJobs>("sla-escalation",
+        j => j.SlaEscalationJob(), "*/15 * * * *");
+    RecurringJob.AddOrUpdate<MaintenanceJobs>("depreciation-monthly",
+        j => j.DepreciationJob(), Cron.Monthly(1, 2));
+    RecurringJob.AddOrUpdate<MaintenanceJobs>("preventive-maintenance",
+        j => j.PreventiveMaintenanceJob(), Cron.Daily(6));
+    RecurringJob.AddOrUpdate<MaintenanceJobs>("warranty-expiry",
+        j => j.WarrantyExpiryAlertJob(), Cron.Daily(7));
+    RecurringJob.AddOrUpdate<MaintenanceJobs>("ticket-reminder",
+        j => j.TicketReminderJob(), Cron.Daily(8));
+    RecurringJob.AddOrUpdate<MaintenanceJobs>("data-cleanup",
+        j => j.DataCleanupJob(), Cron.Weekly(DayOfWeek.Sunday, 3));
+}
 
 app.Run();
 
