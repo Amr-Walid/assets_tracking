@@ -162,7 +162,7 @@ public class CustodySummaryRow
 // ─────────────────── تقرير الإهلاك ───────────────────
 public class DepreciationReportViewModel
 {
-    public List<DepreciationRow> Rows { get; set; } = new();
+    public List<DepreciationReportRow> Rows { get; set; } = new();
 
     public int? CategoryId { get; set; }
     public List<LookupItem> Categories { get; set; } = new();
@@ -176,7 +176,7 @@ public class DepreciationReportViewModel
     public List<ChartSlice> ByCategory { get; set; } = new();
 }
 
-public class DepreciationRow
+public class DepreciationReportRow
 {
     public int Id { get; set; }
     public string AssetTag { get; set; } = string.Empty;
